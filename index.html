@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="style.css">
+    <title>Hirakata</title>
+</head>
+    <body>
+        <table id="menu_mode" class="menu">
+            <tr>
+                <td class="center"></td>
+                <td class="center"><label for="single">Single</label></td>
+                <td class="center"><label for="list">List</label></td>
+            </tr>
+            <tr>
+                <td class="center"><label>Mode: </label></td>
+                <td class="center"><label for="menu_mode_single" class="checkbox_label"><input type="radio" name="mode" id="menu_mode_single" checked></label></td>
+                <td class="center"><label for="menu_mode_list" class="checkbox_label"><input type="radio" name="mode" id="menu_mode_list"></label></td>
+            </tr>
+        </table>
+
+        <table id="menu_selection" class="menu">
+            <tr>
+                <td class="center"><button id="menu_selection_all" class="center">All</button></td>
+                <td class="center"><button id="menu_selection_hiragana" class="center">Hiragana</button</td>
+                <td class="center"><button id="menu_selection_katakana" class="center">Katakana</button></td>
+            </tr>
+            <tr>
+                <td class="center"><button id="menu_selection_basic" class="center">Basic</button></td>
+                <td class="center"><label for="menu_selection_basic_hiragana" class="checkbox_label"><input type="checkbox" id="menu_selection_basic_hiragana"></label></td>
+                <td class="center"><label for="menu_selection_basic_katakana" class="checkbox_label"><input type="checkbox" id="menu_selection_basic_katakana"></label></td>
+            </tr>
+            <tr>
+                <td class="center"><button id="menu_selection_variant" class="center">Variant</button></td>
+                <td class="center"><label for="menu_selection_variant_hiragana" class="checkbox_label"><input type="checkbox" id="menu_selection_variant_hiragana"></label></td>
+                <td class="center"><label for="menu_selection_variant_katakana" class="checkbox_label"><input type="checkbox" id="menu_selection_variant_katakana"></label></td>
+            </tr>
+            <tr>
+                <td class="center"><button id="menu_selection_combo" class="center">Combo</button></td>
+                <td class="center"><label for="menu_selection_combo_hiragana" class="checkbox_label"><input type="checkbox" id="menu_selection_combo_hiragana"></label></td>
+                <td class="center"><label for="menu_selection_combo_katakana" class="checkbox_label"><input type="checkbox" id="menu_selection_combo_katakana"></label></td>
+            </tr>
+        </table>
+
+        <table id="menu_amount" class="menu">
+            <tr>
+                <td class="center"><label>Amount:</label></td>
+                <td class="center" id="menu_amount_value_holder"><input type="range" id="menu_amount_value" min="10" max="0" value="0"></td>
+                <td class="center"><label id="menu_amount_display">0/0</label></td>
+            </tr>
+        </table>
+
+        <table id="menu_correct-answers" class="menu">
+            <tr>
+                <td class="center"><label>Answers:</label></td>
+                <td class="center"><input type="range" id="menu_correct-answers_value" min="1" max="10" value="1"></td>
+                <td class="center"><label id="menu_correct-answers_display">1</label></td>
+            </tr>
+        </table>
+
+        <table id="menu_answer-count" class="menu" style="display: block;">
+            <tr>
+                <td class="center"></td>
+                <td class="center"><label for="menu_answer-count_total">Total answers</label></td>
+                <td class="center"><label for="menu_answer-count_correct">Correct answers</label></td>
+            </tr>
+            <tr>
+                <td class="center"><label>End after: </label></td>
+                <td class="center"><label for="menu_answer-count_total" class="checkbox_label"><input type="radio" name="answer_mode" id="menu_answer-count_total" checked></td>
+                <td class="center"><label for="menu_answer-count_correct" class="checkbox_label"><input type="radio" name="answer_mode" id="menu_answer-count_correct"></td>
+            </tr>
+        </table>
+
+        <button id="menu_start" class="menu" style="display: none;">Start</button>
+    </body>
+</html>
+<script>
+    var game_mode = 1;
+    var max_amount = 0;
+
+    var selection_menu = [];
+    selection_menu[0] = [false, false, false];
+    selection_menu[1] = [false, false, false];
+
+    var game_kana_set = [];
+    var game_selection;
+
+    var game_amount;
+
+    var basic_hiragana = [];
+    basic_hiragana[0] = ["あ", "い", "う", "え", "お", "か", "き", "く", "け", "こ", "さ", "し", "す", "せ", "そ", "た", "ち", "つ", "て", "と", "な", "に", "ぬ", "ね", "の", "は", "ひ", "ふ", "へ", "ほ", "ま", "み", "む", "め", "も", "や", "ゆ", "よ", "ら", "り", "る", "れ", "ろ", "わ", "を", "ん"];
+    basic_hiragana[1] = ["a", "i", "u", "e", "o", "ka", "ki", "ku", "ke", "ko", "sa", "shi", "su", "se", "so", "ta", "chi", "tsu", "te", "to", "na", "ni", "nu", "ne", "no", "ha", "hi", "fu", "he", "ho", "ma", "mi", "mu", "me", "mo", "ya", "yu", "yo", "ra", "ri", "ru", "re", "ro", "wa", "wo", "n"];
+
+    var basic_katakana = [];
+    basic_katakana[0] = ['ア', 'イ', 'ウ', 'エ', 'オ', 'カ', 'キ', 'ク', 'ケ', 'コ', 'サ', 'シ', 'ス', 'セ', 'ソ', 'タ', 'チ', 'ツ', 'テ', 'ト', 'ナ', 'ニ', 'ヌ', 'ネ', 'ノ', 'ハ', 'ヒ', 'フ', 'ヘ', 'ホ', 'マ', 'ミ', 'ム', 'メ', 'モ', 'ヤ', 'ユ', 'ヨ', 'ラ', 'リ', 'ル', 'レ', 'ロ', 'ワ', 'ヲ', 'ン'];
+    basic_katakana[1] = ["a", "i", "u", "e", "o", "ka", "ki", "ku", "ke", "ko", "sa", "shi", "su", "se", "so", "ta", "chi", "tsu", "te", "to", "na", "ni", "nu", "ne", "no", "ha", "hi", "fu", "he", "ho", "ma", "mi", "mu", "me", "mo", "ya", "yu", "yo", "ra", "ri", "ru", "re", "ro", "wa", "wo", "n"];
+
+    var variant_hiragana = [];
+    variant_hiragana[0] = ['が', 'ぎ', 'ぐ', 'げ', 'ご', 'ざ', 'じ', 'ず', 'ぜ', 'ぞ', 'だ', 'ぢ', 'づ', 'で', 'ど', 'ば', 'び', 'ぶ', 'べ', 'ぼ', 'ぱ', 'ぴ', 'ぷ', 'ぺ', 'ぽ'];
+    variant_hiragana[1] = ["ga", "gi", "gu", "ge", "go", "za", "ji", "zu", "ze", "zo", "da", "ji", "zu", "de", "do", "ba", "bi", "bu", "be", "bo", "pa", "pi", "pu", "pe", "po"];
+
+    var variant_katakana = [];
+    variant_katakana[0] = ["ガ", "ギ", "グ", "ゲ", "ゴ", "ザ", "ジ", "ズ", "ゼ", "ゾ", "ダ", "ヂ", "ヅ", "デ", "ド", "バ", "ビ", "ブ", "ベ", "ボ", "パ", "ピ", "プ", "ペ", "ポ"];
+    variant_katakana[1] = ["ga", "gi", "gu", "ge", "go", "za", "ji", "zu", "ze", "zo", "da", "ji", "zu", "de", "do", "ba", "bi", "bu", "be", "bo", "pa", "pi", "pu", "pe", "po"];
+
+    var combo_hiragana = [];
+    combo_hiragana[0] = ["きゃ", "きゅ", "きょ", "しゃ", "しゅ", "しょ", "ちゃ", "ちゅ", "ちょ", "にゃ", "にゅ", "にょ", "ひゃ", "ひゅ", "ひょ", "みゃ", "みゅ", "みょ", "りゃ", "りゅ", "りょ", "ぎゃ", "ぎゅ", "ぎょ", "じゃ", "じゅ", "じょ", "ぢゃ", "ぢゅ", "ぢょ", "びゃ", "びゅ", "びょ", "ぴゃ", "ぴゅ", "ぴょ"]
+    combo_hiragana[1] = ["kya", "kyu", "kyo", "sha", "shu", "sho", "cha", "chu", "cho", "nya", "nyu", "nyo", "hya", "hyu", "hyo", "mya", "myu", "myo", "rya", "ryu", "ryo", "gya", "gyu", "gyo", "ja", "ju", "jo", "ja", "ju", "jo", "bya", "byu", "byo", "pya", "pyu", "pyo"]
+
+    var combo_katakana = [];
+    combo_katakana[0] = ['キャ', 'キュ', 'キョ', 'シャ', 'シュ', 'ショ', 'チャ', 'チュ', 'チョ', 'ニャ', 'ニュ', 'ニョ', 'ヒャ', 'ヒュ', 'ヒョ', 'ミャ', 'ミュ', 'ミョ', 'リャ', 'リュ', 'リョ', 'ギャ', 'ギュ', 'ギョ', 'ジャ', 'ジュ', 'ジョ', 'ヂャ', 'ヂュ', 'ヂョ', 'ビャ', 'ビュ', 'ビョ', 'ピャ', 'ピュ', 'ピョ']
+    combo_katakana[1] = ["kya", "kyu", "kyo", "sha", "shu", "sho", "cha", "chu", "cho", "nya", "nyu", "nyo", "hya", "hyu", "hyo", "mya", "myu", "myo", "rya", "ryu", "ryo", "gya", "gyu", "gyo", "ja", "ju", "jo", "ja", "ju", "jo", "bya", "byu", "byo", "pya", "pyu", "pyo"]
+
+    const menu_mode_single = document.getElementById("menu_mode_single");
+    const menu_mode_list = document.getElementById("menu_mode_list");
+
+
+    const menu_selection_all = document.getElementById("menu_selection_all");
+    const menu_selection_hiragana = document.getElementById("menu_selection_hiragana");
+    const menu_selection_katakana = document.getElementById("menu_selection_katakana");
+
+    const menu_selection_basic = document.getElementById("menu_selection_basic");
+    const menu_selection_basic_hiragana = document.getElementById("menu_selection_basic_hiragana");
+    const menu_selection_basic_katakana = document.getElementById("menu_selection_basic_katakana");
+
+    const menu_selection_variant = document.getElementById("menu_selection_variant");
+    const menu_selection_variant_hiragana = document.getElementById("menu_selection_variant_hiragana");
+    const menu_selection_variant_katakana = document.getElementById("menu_selection_variant_katakana");
+
+    const menu_selection_combo = document.getElementById("menu_selection_combo");
+    const menu_selection_combo_hiragana = document.getElementById("menu_selection_combo_hiragana");
+    const menu_selection_combo_katakana = document.getElementById("menu_selection_combo_katakana");
+
+    const menu_amount_value = document.getElementById("menu_amount_value");
+
+    const menu_amount_value_holder = document.getElementById("menu_amount_value_holder")
+    const menu_amount_display = document.getElementById("menu_amount_display");
+
+    const menu_correct_answers = document.getElementById("menu_correct-answers");
+    const menu_correct_answers_value = document.getElementById("menu_correct-answers_value");
+    const menu_correct_answers_display = document.getElementById("menu_correct-answers_display");
+
+    const menu_answer_count_value = document.getElementById("menu_correct-answers_value");
+    const menu_answer_count_total = document.getElementById("menu_answer-count_total");
+    const menu_answer_count_correct = document.getElementById("menu_answer-count_correct");
+
+    const menu_answer_count = document.getElementById("menu_answer-count");
+
+    const menu_start = document.getElementById("menu_start");
+
+
+    menu_select_set();
+
+
+    menu_mode_single.addEventListener("change", ()=>{
+        game_mode = 1;
+        menu_answer_count.style.display = "block";
+        menu_correct_answers.style.display = "block";
+    });
+    menu_mode_list.addEventListener("change", ()=>{
+        game_mode = 2;
+        menu_answer_count.style.display = "none";
+        menu_correct_answers.style.display = "none";
+    });
+
+    menu_selection_all.addEventListener("click", ()=>{
+        if(!selection_menu[0].includes(false) && !selection_menu[1].includes(false))
+        {
+            selection_menu[0] = [false, false, false];
+            selection_menu[1] = [false, false, false];
+        }
+        else
+        {
+            selection_menu[0] = [true, true, true];
+            selection_menu[1] = [true, true, true];
+        }
+
+        menu_select_set();
+    });
+
+    menu_selection_hiragana.addEventListener("click", ()=>{
+        if(!selection_menu[0].includes(false))
+        {
+            selection_menu[0] = [false, false, false];
+        }
+        else
+        {
+            selection_menu[0] = [true, true, true];
+        }
+
+        menu_select_set();
+    });
+
+    menu_selection_katakana.addEventListener("click", ()=>{
+        if(!selection_menu[1].includes(false))
+        {
+            selection_menu[1] = [false, false, false];
+        }
+        else
+        {
+            selection_menu[1] = [true, true, true];
+        }
+
+        menu_select_set();
+    });
+
+    menu_selection_basic.addEventListener("click", ()=>{
+        if(selection_menu[0][0] && selection_menu[1][0])
+        {
+            selection_menu[0][0] = false;
+            selection_menu[1][0] = false;
+        }
+        else
+        {
+            selection_menu[0][0] = true;
+            selection_menu[1][0] = true;
+        }
+
+        menu_select_set();
+    });
+
+    menu_selection_variant.addEventListener("click", ()=>{
+        if(selection_menu[0][1] && selection_menu[1][1])
+        {
+            selection_menu[0][1] = false;
+            selection_menu[1][1] = false;
+        }
+        else
+        {
+            selection_menu[0][1] = true;
+            selection_menu[1][1] = true;
+        }
+
+        menu_select_set();
+    });
+
+    menu_selection_combo.addEventListener("click", ()=>{
+        if(selection_menu[0][2] && selection_menu[1][2])
+        {
+            selection_menu[0][2] = false;
+            selection_menu[1][2] = false;
+        }
+        else
+        {
+            selection_menu[0][2] = true;
+            selection_menu[1][2] = true;
+        }
+
+        menu_select_set();
+    });
+
+    menu_selection_basic_hiragana.addEventListener("change", ()=>{selection_menu[0][0] = menu_selection_basic_hiragana.checked; menu_select_set();});
+    menu_selection_basic_katakana.addEventListener("change", ()=>{selection_menu[1][0] = menu_selection_basic_katakana.checked; menu_select_set();});
+
+    menu_selection_variant_hiragana.addEventListener("change", ()=>{selection_menu[0][1] = menu_selection_variant_hiragana.checked; menu_select_set();});
+    menu_selection_variant_katakana.addEventListener("change", ()=>{selection_menu[1][1] = menu_selection_variant_katakana.checked; menu_select_set();});
+
+    menu_selection_combo_hiragana.addEventListener("change", ()=>{selection_menu[0][2] = menu_selection_combo_hiragana.checked; menu_select_set();});
+    menu_selection_combo_katakana.addEventListener("change", ()=>{selection_menu[1][2] = menu_selection_combo_katakana.checked; menu_select_set();});
+
+    menu_amount_value.addEventListener("input", ()=>{
+        if(menu_amount_value.value)
+            menu_amount_display.textContent = menu_amount_value.value+"/"+max_amount;
+        else
+        {
+            menu_amount_display.textContent = 0+"/"+max_amount;
+            menu_amount_value.value = 0;
+        }
+        menu_select_set();
+    });
+    menu_correct_answers_value.addEventListener("input", ()=>{menu_correct_answers_display.textContent = menu_correct_answers_value.value;});
+
+    menu_start.addEventListener("click", ()=>{game_prepare()});
+
+
+
+    function menu_select_set()
+    {
+        menu_selection_basic_hiragana.checked = selection_menu[0][0];
+        menu_selection_basic_katakana.checked = selection_menu[1][0];
+
+        menu_selection_variant_hiragana.checked = selection_menu[0][1];
+        menu_selection_variant_katakana.checked = selection_menu[1][1];
+
+        menu_selection_combo_hiragana.checked = selection_menu[0][2];
+        menu_selection_combo_katakana.checked = selection_menu[1][2];
+
+            max_amount = 0;
+
+            if(selection_menu[0][0])
+                max_amount += 46;
+            if(selection_menu[1][0])
+                max_amount += 46;
+            if(selection_menu[0][1])
+                max_amount += 25;
+            if(selection_menu[1][1])
+                max_amount += 25;
+            if(selection_menu[0][2])
+                max_amount += 36;
+            if(selection_menu[1][2])
+                max_amount += 36;
+
+
+            if(max_amount > 0)
+                menu_amount_value.min = 10;
+            else
+                menu_amount_value.min = 0;
+
+                menu_amount_value.max = max_amount;
+            menu_amount_display.textContent = menu_amount_value.value+"/"+max_amount;
+
+            if(!selection_menu[0].includes(true) && !selection_menu[1].includes(true))
+            menu_amount_value.value = 0;
+
+            if(menu_amount_value.value > 9)
+                menu_start.style.display = "block";
+            else
+                menu_start.style.display = "none";
+    }
+
+    function game_prepare()
+    {
+        var game_kana_preparation_set = [];
+        game_kana_preparation_set[0] = [];
+        game_kana_preparation_set[1] = [];
+        game_kana_preparation_set[2] = [];
+
+        game_kana_set[0] = [];
+        game_kana_set[1] = [];
+        game_kana_set[2] = [];
+        game_kana_set[3] = [];
+        game_kana_set[4] = [];
+        game_kana_set[5] = [];
+        game_kana_set[6] = [];
+
+        game_amount = menu_amount_value.value;
+
+        if(selection_menu[0][0])
+            for(i = 0; i < 46; i++)
+            {
+                game_kana_preparation_set[0][game_kana_preparation_set[0].length] = basic_hiragana[0][i];
+                game_kana_preparation_set[1][game_kana_preparation_set[1].length] = basic_hiragana[1][i];
+                game_kana_preparation_set[2][game_kana_preparation_set[2].length] = false;
+            }
+        if(selection_menu[1][0])
+            for(i = 0; i < 46; i++)
+            {
+                game_kana_preparation_set[0][game_kana_preparation_set[0].length] = basic_katakana[0][i];
+                game_kana_preparation_set[1][game_kana_preparation_set[1].length] = basic_katakana[1][i];
+                game_kana_preparation_set[2][game_kana_preparation_set[2].length] = false;
+            }
+        if(selection_menu[0][1])
+            for(i = 0; i < 25; i++)
+            {
+                game_kana_preparation_set[0][game_kana_preparation_set[0].length] = variant_hiragana[0][i];
+                game_kana_preparation_set[1][game_kana_preparation_set[1].length] = variant_hiragana[1][i];
+                game_kana_preparation_set[2][game_kana_preparation_set[2].length] = false;
+            }
+        if(selection_menu[1][1])
+            for(i = 0; i < 25; i++)
+            {
+                game_kana_preparation_set[0][game_kana_preparation_set[0].length] = variant_katakana[0][i];
+                game_kana_preparation_set[1][game_kana_preparation_set[1].length] = variant_katakana[1][i];
+                game_kana_preparation_set[2][game_kana_preparation_set[2].length] = false;
+            }
+        if(selection_menu[0][2])
+            for(i = 0; i < 36; i++)
+            {
+                game_kana_preparation_set[0][game_kana_preparation_set[0].length] = combo_hiragana[0][i];
+                game_kana_preparation_set[1][game_kana_preparation_set[1].length] = combo_hiragana[1][i];
+                game_kana_preparation_set[2][game_kana_preparation_set[2].length] = false;
+            }
+        if(selection_menu[1][2])
+            for(i = 0; i < 36; i++)
+            {
+                game_kana_preparation_set[0][game_kana_preparation_set[0].length] = combo_katakana[0][i];
+                game_kana_preparation_set[1][game_kana_preparation_set[1].length] = combo_katakana[1][i];
+                game_kana_preparation_set[2][game_kana_preparation_set[2].length] = false;
+            }
+
+            for(i = 0; i < game_amount; i++)
+            {
+                var game_random = Math.floor(Math.random()*game_kana_preparation_set[0].length);
+                if(game_kana_preparation_set[2][game_random] == false)
+                    {
+                        game_kana_set[0][i] = game_kana_preparation_set[0][game_random];
+                        game_kana_set[1][i] = game_kana_preparation_set[1][game_random];
+                        game_kana_set[2][i] = 0;
+                        game_kana_set[3][i] = 0;
+                        game_kana_set[4][i] = false;
+                        game_kana_set[5][i] = [];
+                        game_kana_set[6][i] = game_kana_preparation_set[0].indexOf(game_kana_preparation_set[0][game_random]);
+                        game_kana_preparation_set[2][game_random] = true;
+                    }
+                    else
+                    i--;
+                }
+                console.log(game_kana_set[6])
+
+                for(i = 0; i < game_kana_set[6].length; i++)
+                {
+                    for(j = 0; j < ( game_kana_set[6].length - i -1 ); j++)
+                    {
+                        if(game_kana_set[6][j] > game_kana_set[6][j+1])
+                        {
+                            for(k = 0; k<7; k++)
+                            {
+                                var temp = game_kana_set[k][j];
+                                game_kana_set[k][j] = game_kana_set[k][j + 1];
+                                game_kana_set[k][j+1] = temp;
+                            }
+                        }
+                    }
+                }
+
+                console.log(game_kana_set)
+
+        game_build();
+    }
+
+    const game_main_holder = document.createElement("table");
+    const game_progress_holder = document.createElement("tr");
+    const game_label_holder = document.createElement("tr");
+    const game_input_holder = document.createElement("tr");
+    const game_correction_holder = document.createElement("tr");
+    const game_progress_label = document.createElement("label");
+    const game_progress = document.createElement("progress");
+    const game_label = document.createElement("label");
+    const game_input = document.createElement("input");
+    const game_correction = document.createElement("label");
+
+    function game_build()
+    {
+        var menu_elements = document.querySelectorAll(".menu");
+
+        menu_elements.forEach((el) => {
+            el.remove();
+        });
+
+        if(game_mode == 1)
+        {
+            game_main_holder.setAttribute("class", "game");
+
+            game_label_holder.setAttribute("id", "game_label_holder");
+            game_label_holder.setAttribute("class", "center");
+
+            game_progress_holder.setAttribute("id", "game_progress_holder");
+            game_progress_holder.setAttribute("class", "center");
+
+            game_input_holder.setAttribute("id", "game_input_holder");
+            game_input_holder.setAttribute("class", "center");
+
+            game_correction_holder.setAttribute("id", "game_correction_holder");
+            game_correction_holder.setAttribute("class", "center");
+
+            game_progress_label.setAttribute("id", "game_progress_label");
+            game_progress_label.textContent = "Progress: "
+            game_progress.setAttribute("max", 100);
+            game_progress.setAttribute("value", 0);
+            game_progress.setAttribute("id", "game_progress");
+
+            game_label.setAttribute("id", "game_label");
+
+            game_input.setAttribute("id", "game_input");
+            game_input.setAttribute("type", "text");
+            game_input.setAttribute("maxlength", 3);
+            game_input.setAttribute("autofocus", true);
+
+            game_label.setAttribute("id", "game_correction");
+
+            game_progress_holder.appendChild(game_progress_label);
+            game_progress_holder.appendChild(game_progress);
+            game_label_holder.appendChild(game_label);
+            game_input_holder.appendChild(game_input);
+            game_correction_holder.appendChild(game_correction);
+
+            game_main_holder.appendChild(game_progress_holder);
+            game_main_holder.appendChild(game_label_holder);
+            game_main_holder.appendChild(game_input_holder);
+            game_main_holder.appendChild(game_correction_holder);
+
+            document.body.appendChild(game_main_holder);
+
+            game_input.addEventListener("keydown", (event)=>{
+                if(event.key == "Enter")
+                play_single();
+            })
+            game_selection = Math.floor(Math.random()*game_kana_set[0].length);
+            game_label.textContent = game_kana_set[0][game_selection];
+        }
+    }
+
+    var game_progress_value = 0;
+    function play_single()
+    {
+        if(game_input.value)
+            game_kana_set[5][game_selection][game_kana_set[5][game_selection].length] = game_input.value;
+        else
+            game_kana_set[5][game_selection][game_kana_set[5][game_selection].length] = "-";
+
+
+        if(game_input.value == game_kana_set[1][game_selection])
+        {
+            game_kana_set[2][game_selection]++;
+            game_kana_set[3][game_selection]++;
+            game_correction.textContent = "Correct";
+            game_progress_value++;
+        }
+        else
+        {
+            game_kana_set[3][game_selection]++;
+            game_correction.textContent = "Incorrect ("+game_kana_set[1][game_selection]+")";
+            if(menu_answer_count_total.checked)
+                game_progress_value++;
+        }
+
+        if(game_kana_set[2][game_selection] >= menu_answer_count_value.value && menu_answer_count_correct.checked || game_kana_set[3][game_selection] >= menu_answer_count_value.value && menu_answer_count_total.checked)
+        {
+            game_kana_set[4][game_selection] = true;
+        }
+
+        while(true)
+        {
+            game_selection = Math.floor(Math.random()*game_kana_set[0].length);
+            if(!game_kana_set[4][game_selection])
+            {
+                game_label.textContent = game_kana_set[0][game_selection];
+                game_input.value = "";
+                break;
+            }
+
+            if(!game_kana_set[4].includes(false))
+            {
+                summary();
+                break;
+            }
+        }
+        game_progress.value = game_progress_value / (menu_answer_count_value.value * menu_amount_value.value) * 100;
+    }
+
+
+
+
+
+
+
+
+
+
+
+    function summary()
+    {
+        var game_elements = document.querySelectorAll(".game");
+
+        game_elements.forEach((el) => {
+            el.remove();
+        });
+
+        const summary_table = document.createElement("table");
+        summary_table.setAttribute("class", "summary");
+
+        var summary_tab = [];
+
+        var summary_points = 0;
+        var summary_possible_points = 0;
+
+        summary_tab[0] = document.createElement("tr");;
+            const summary_user_td = document.createElement("td");
+            summary_user_td.setAttribute("class", "center");
+            summary_user_td.setAttribute("id", "user_answer");
+            summary_user_td.textContent = "Your answers";
+            const summary_kana_td = document.createElement("td");
+            summary_kana_td.setAttribute("class", "center");
+            summary_kana_td.textContent = "Kana";
+            const summary_correct_td = document.createElement("td");
+            summary_correct_td.setAttribute("class", "center");
+            summary_correct_td.textContent = "Correct answer";
+            const summary_correct_input_td = document.createElement("td");
+            summary_correct_input_td.setAttribute("class", "center");
+            summary_correct_input_td.textContent = "Correct";
+            const summary_total_input_td = document.createElement("td");
+            summary_total_input_td.setAttribute("class", "center");
+            summary_total_input_td.textContent = "Total";
+
+            summary_tab[0].appendChild(summary_user_td);
+            summary_tab[0].appendChild(summary_kana_td);
+            summary_tab[0].appendChild(summary_correct_td);
+            summary_tab[0].appendChild(summary_correct_input_td);
+            summary_tab[0].appendChild(summary_total_input_td);
+            summary_table.appendChild(summary_tab[0])
+
+        for(i = 0; i < game_amount; i++)
+        {
+            summary_tab[i+1] = document.createElement("tr");;
+
+            const summary_user_td = document.createElement("td");
+            summary_user_td.setAttribute("class", "center");
+            summary_user_td.setAttribute("id", "user_answer");
+
+            const summary_user_answer_separator = document.createElement("label")
+            summary_user_answer_separator.textContent = "|";
+            summary_user_answer_separator.style.color = "black";
+            summary_user_td.appendChild(summary_user_answer_separator);
+
+            game_kana_set[5][i].forEach(el =>{
+                const summary_user_answer = document.createElement("label");
+
+                summary_user_answer.textContent = el;
+
+                summary_user_answer.style.width = "30px";
+                if(el == game_kana_set[1][i])
+                {
+                    summary_user_answer.style.color = "rgb(0, 255, 0)";
+                }
+                else
+                {
+                    summary_user_answer.style.color = "rgb(255, 0, 0)";
+                    //summary_user_answer.style.border = "solid rgb(255, 0, 0) 2px";
+                }
+
+                summary_user_td.appendChild(summary_user_answer);
+
+                const summary_user_answer_separator = document.createElement("label")
+                summary_user_answer_separator.textContent = "|";
+                summary_user_answer_separator.style.color = "black";
+                summary_user_td.appendChild(summary_user_answer_separator);
+            });
+            const summary_kana_td = document.createElement("td");
+            summary_kana_td.setAttribute("class", "center");
+            summary_kana_td.textContent = game_kana_set[0][i];
+            const summary_correct_td = document.createElement("td");
+            summary_correct_td.setAttribute("class", "center");
+            summary_correct_td.textContent = game_kana_set[1][i];
+            const summary_correct_input_td = document.createElement("td");
+            summary_correct_input_td.setAttribute("class", "center");
+            summary_correct_input_td.textContent = game_kana_set[2][i];
+            summary_points += game_kana_set[2][i];
+            const summary_total_input_td = document.createElement("td");
+            summary_total_input_td.setAttribute("class", "center");
+            summary_total_input_td.textContent = game_kana_set[3][i];
+            summary_possible_points += game_kana_set[3][i];
+
+            if(game_kana_set[2][i] == game_kana_set[3][i])
+            {
+                summary_correct_input_td.style.color = "rgb(0, 255, 0)";
+                summary_total_input_td.style.color = "rgb(0, 255, 0)";
+            }
+            else if(game_kana_set[2][i] == 0)
+            {
+                summary_correct_input_td.style.color = "rgb(255, 0, 0)"
+                summary_total_input_td.style.color = "rgb(255, 0, 0)";
+            }
+            else
+            {
+                var  x = game_kana_set[2][i]/game_kana_set[3][i];
+                if(x < .5)
+                {
+                    x*=2*255;
+                    summary_correct_input_td.style.color = "rgb(255, "+x+", 0)";
+                    summary_total_input_td.style.color = "rgb(255, "+x+", 0)";
+                }
+                else
+                {
+                    x *= 2;
+                    x -= 1;
+                    x *= 255;
+                    x = 255-x;
+                    summary_correct_input_td.style.color = "rgb("+x+", 255, 0)";
+                    summary_total_input_td.style.color = "rgb("+x+", 255, 0)";
+                }
+                console.log(x);
+            }
+
+            summary_tab[i+1].appendChild(summary_user_td);
+            summary_tab[i+1].appendChild(summary_kana_td);
+            summary_tab[i+1].appendChild(summary_correct_td);
+            summary_tab[i+1].appendChild(summary_correct_input_td);
+            summary_tab[i+1].appendChild(summary_total_input_td);
+            summary_table.appendChild(summary_tab[i+1])
+        }
+
+        document.body.appendChild(summary_table);
+    }
+</script>
