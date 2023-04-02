@@ -579,9 +579,6 @@
     function play_select(game_input_select)
     {
         game_kana_set[5][game_selection][game_kana_set[5][game_selection].length] = game_input_select.textContent;
-
-        console.log(game_input_select.textContent)
-        console.log(game_kana_set[1][game_selection])
         if(game_input_select.textContent == game_kana_set[1][game_selection])
         {
             game_kana_set[2][game_selection]++;
@@ -625,9 +622,7 @@
 
     function select_change()
     {
-        var a = 1;
         var b = Math.floor(Math.random()*4)+1;
-        console.log(b)
         switch(b)
             {
                 case 1:
