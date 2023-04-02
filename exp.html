@@ -6,6 +6,19 @@
     <title>Hirakata</title>
 </head>
     <body>
+        <table id="menu_mode" class="menu">
+            <tr>
+                <td class="center"></td>
+                <td class="center"><label for="single">Keyboard</label></td>
+                <td class="center"><label for="list">Select</label></td>
+            </tr>
+            <tr>
+                <td class="center"><label>Mode: </label></td>
+                <td class="center"><label for="menu_mode_single" class="checkbox_label"><input type="radio" name="mode" id="menu_mode_single" checked></label></td>
+                <td class="center"><label for="menu_mode_list" class="checkbox_label"><input type="radio" name="mode" id="menu_mode_list"></label></td>
+            </tr>
+        </table>
+
         <table id="menu_selection" class="menu">
             <tr>
                 <td class="center"><button id="menu_selection_all" class="center">All</button></td>
@@ -62,6 +75,7 @@
     </body>
 </html>
 <script>
+    var game_mode = 1;
     var max_amount = 0;
 
     var selection_menu = [];
@@ -69,6 +83,7 @@
     selection_menu[1] = [false, false, false];
 
     var game_kana_set = [];
+    var game_kana_preparation_set = [];
     var game_selection;
 
     var game_amount;
@@ -96,6 +111,10 @@
     var combo_katakana = [];
     combo_katakana[0] = ['キャ', 'キュ', 'キョ', 'シャ', 'シュ', 'ショ', 'チャ', 'チュ', 'チョ', 'ニャ', 'ニュ', 'ニョ', 'ヒャ', 'ヒュ', 'ヒョ', 'ミャ', 'ミュ', 'ミョ', 'リャ', 'リュ', 'リョ', 'ギャ', 'ギュ', 'ギョ', 'ジャ', 'ジュ', 'ジョ', 'ヂャ', 'ヂュ', 'ヂョ', 'ビャ', 'ビュ', 'ビョ', 'ピャ', 'ピュ', 'ピョ']
     combo_katakana[1] = ["kya", "kyu", "kyo", "sha", "shu", "sho", "cha", "chu", "cho", "nya", "nyu", "nyo", "hya", "hyu", "hyo", "mya", "myu", "myo", "rya", "ryu", "ryo", "gya", "gyu", "gyo", "ja", "ju", "jo", "ja", "ju", "jo", "bya", "byu", "byo", "pya", "pyu", "pyo"]
+
+    const menu_mode_single = document.getElementById("menu_mode_single");
+    const menu_mode_list = document.getElementById("menu_mode_list");
+
 
     const menu_selection_all = document.getElementById("menu_selection_all");
     const menu_selection_hiragana = document.getElementById("menu_selection_hiragana");
@@ -132,6 +151,10 @@
 
 
     menu_select_set();
+
+
+    menu_mode_single.addEventListener("change", ()=>{game_mode = 1;});
+    menu_mode_list.addEventListener("change", ()=>{game_mode = 2;});
 
     menu_selection_all.addEventListener("click", ()=>{
         if(!selection_menu[0].includes(false) && !selection_menu[1].includes(false))
@@ -290,7 +313,6 @@
 
     function game_prepare()
     {
-        var game_kana_preparation_set = [];
         game_kana_preparation_set[0] = [];
         game_kana_preparation_set[1] = [];
         game_kana_preparation_set[2] = [];
@@ -365,7 +387,6 @@
                     else
                     i--;
                 }
-                console.log(game_kana_set[6])
 
                 for(i = 0; i < game_kana_set[6].length; i++)
                 {
@@ -383,8 +404,6 @@
                     }
                 }
 
-                console.log(game_kana_set)
-
         game_build();
     }
 
@@ -393,10 +412,20 @@
     const game_label_holder = document.createElement("tr");
     const game_input_holder = document.createElement("tr");
     const game_correction_holder = document.createElement("tr");
-    const game_progress_label = document.createElement("label");
     const game_progress = document.createElement("progress");
     const game_label = document.createElement("label");
     const game_input = document.createElement("input");
+
+    const game_input_select_holder = document.createElement("table");
+
+    const game_input_select_holder_1 = document.createElement("tr");
+    const game_input_select_holder_2 = document.createElement("tr");
+
+    const game_input_select_1 = document.createElement("button");
+    const game_input_select_2 = document.createElement("button");
+    const game_input_select_3 = document.createElement("button");
+    const game_input_select_4 = document.createElement("button");
+
     const game_correction = document.createElement("label");
 
     function game_build()
@@ -415,47 +444,87 @@
         game_progress_holder.setAttribute("id", "game_progress_holder");
         game_progress_holder.setAttribute("class", "center");
 
-        game_input_holder.setAttribute("id", "game_input_holder");
-        game_input_holder.setAttribute("class", "center");
-
         game_correction_holder.setAttribute("id", "game_correction_holder");
         game_correction_holder.setAttribute("class", "center");
 
-        game_progress_label.setAttribute("id", "game_progress_label");
-        game_progress_label.textContent = "Progress: "
         game_progress.setAttribute("max", 100);
         game_progress.setAttribute("value", 0);
         game_progress.setAttribute("id", "game_progress");
 
         game_label.setAttribute("id", "game_label");
 
-        game_input.setAttribute("id", "game_input");
-        game_input.setAttribute("type", "text");
-        game_input.setAttribute("maxlength", 3);
-        game_input.setAttribute("autofocus", true);
+        game_correction.setAttribute("id", "game_correction");
 
-        game_label.setAttribute("id", "game_correction");
+        game_selection = Math.floor(Math.random()*game_kana_set[0].length);
+        game_label.textContent = game_kana_set[0][game_selection];
 
-        game_progress_holder.appendChild(game_progress_label);
+        if(game_mode == 1)
+        {
+
+            game_input_holder.setAttribute("id", "game_input_holder");
+            game_input_holder.setAttribute("class", "center");
+
+            game_input.setAttribute("id", "game_input");
+            game_input.setAttribute("type", "text");
+            game_input.setAttribute("maxlength", 3);
+            game_input.setAttribute("autofocus", true);
+
+            game_input_holder.appendChild(game_input);
+
+            game_input.addEventListener("keydown", (event)=>{
+                if(event.key == "Enter")
+                play_single();
+            })
+        }
+        else if(game_mode == 2)
+        {
+            game_input_select_1.setAttribute("class", "center");
+            game_input_select_2.setAttribute("class", "center");
+            game_input_select_3.setAttribute("class", "center");
+            game_input_select_4.setAttribute("class", "center");
+
+            game_input_select_1.textContent = "1";
+            game_input_select_2.textContent = "2";
+            game_input_select_3.textContent = "3";
+            game_input_select_4.textContent = "4";
+
+            game_input_select_holder_1.appendChild(game_input_select_1);
+            game_input_select_holder_1.appendChild(game_input_select_2);
+            game_input_select_holder_2.appendChild(game_input_select_3);
+            game_input_select_holder_2.appendChild(game_input_select_4);
+
+            game_input_select_1.addEventListener("drag", ()=>{return false;});
+            game_input_select_2.addEventListener("drag", ()=>{return false;});
+            game_input_select_3.addEventListener("drag", ()=>{return false;});
+            game_input_select_4.addEventListener("drag", ()=>{return false;});
+
+            game_input_select_1.addEventListener("click", ()=>{play_select(event.target);});
+            game_input_select_2.addEventListener("click", ()=>{play_select(event.target);});
+            game_input_select_3.addEventListener("click", ()=>{play_select(event.target);});
+            game_input_select_4.addEventListener("click", ()=>{play_select(event.target);});
+
+            game_input_select_holder.appendChild(game_input_select_holder_1);
+            game_input_select_holder.appendChild(game_input_select_holder_2);
+
+            select_change();
+        }
+
+        game_correction_holder.appendChild(game_correction);
         game_progress_holder.appendChild(game_progress);
         game_label_holder.appendChild(game_label);
-        game_input_holder.appendChild(game_input);
-        game_correction_holder.appendChild(game_correction);
 
         game_main_holder.appendChild(game_progress_holder);
         game_main_holder.appendChild(game_label_holder);
-        game_main_holder.appendChild(game_input_holder);
+        if(game_mode == 1)
+            game_main_holder.appendChild(game_input_holder);
+        else if(game_mode == 2)
+            game_main_holder.appendChild(game_input_select_holder);
         game_main_holder.appendChild(game_correction_holder);
 
         document.body.appendChild(game_main_holder);
-
-        game_input.addEventListener("keydown", (event)=>{
-            if(event.key == "Enter")
-            play_single();
-        })
-        game_selection = Math.floor(Math.random()*game_kana_set[0].length);
-        game_label.textContent = game_kana_set[0][game_selection];
     }
+
+
 
     var game_progress_value = 0;
     function play_single()
@@ -505,8 +574,164 @@
         game_progress.value = game_progress_value / (menu_answer_count_value.value * menu_amount_value.value) * 100;
     }
 
+    var counter = 0
 
+    function play_select(game_input_select)
+    {
+        game_kana_set[5][game_selection][game_kana_set[5][game_selection].length] = game_input_select.textContent;
 
+        console.log(game_input_select.textContent)
+        console.log(game_kana_set[1][game_selection])
+        if(game_input_select.textContent == game_kana_set[1][game_selection])
+        {
+            game_kana_set[2][game_selection]++;
+            game_kana_set[3][game_selection]++;
+            game_correction.textContent = "Correct";
+            game_progress_value++;
+        }
+        else
+        {
+            game_kana_set[3][game_selection]++;
+            game_correction.textContent = "Incorrect ("+game_kana_set[1][game_selection]+")";
+            if(menu_answer_count_total.checked)
+                game_progress_value++;
+        }
+
+        if(game_kana_set[2][game_selection] >= menu_answer_count_value.value && menu_answer_count_correct.checked || game_kana_set[3][game_selection] >= menu_answer_count_value.value && menu_answer_count_total.checked)
+        {
+            game_kana_set[4][game_selection] = true;
+        }
+
+        while(true)
+        {
+            game_selection = Math.floor(Math.random()*game_kana_set[0].length);
+            if(!game_kana_set[4][game_selection])
+            {
+                game_label.textContent = game_kana_set[0][game_selection];
+                break;
+            }
+
+            if(!game_kana_set[4].includes(false))
+            {
+                summary();
+                break;
+            }
+        }
+        game_progress.value = game_progress_value / (menu_answer_count_value.value * menu_amount_value.value) * 100;
+
+        select_change()
+
+    }
+
+    function select_change()
+    {
+        var a = 1;
+        var b = Math.floor(Math.random()*4)+1;
+        console.log(b)
+        switch(b)
+            {
+                case 1:
+                    game_input_select_1.textContent = game_kana_set[1][game_selection];
+                    var rand_1 = Math.floor(Math.random()*game_kana_preparation_set[0].length);
+                    var rand_2 = Math.floor(Math.random()*game_kana_preparation_set[0].length);
+                    var rand_3 = Math.floor(Math.random()*game_kana_preparation_set[0].length);
+
+                    do
+                    {
+                        rand_1 = Math.floor(Math.random()*game_kana_preparation_set[0].length);
+                        game_input_select_2.textContent = game_kana_preparation_set[1][rand_1];
+                    }
+                    while(game_kana_preparation_set[1][rand_1] == game_kana_set[1][game_selection])
+                    do
+                    {
+                        rand_2 = Math.floor(Math.random()*game_kana_preparation_set[0].length);
+                        game_input_select_3.textContent = game_kana_preparation_set[1][rand_2];
+                    }
+                    while(game_kana_preparation_set[1][rand_2] == game_kana_set[1][game_selection] || rand_2 == rand_1 )
+                    do
+                    {
+                        rand_3 = Math.floor(Math.random()*game_kana_preparation_set[0].length);
+                        game_input_select_4.textContent = game_kana_preparation_set[1][rand_3];
+                    }
+                    while(game_kana_preparation_set[1][rand_2] == game_kana_set[1][game_selection] || rand_3 == rand_1 || rand_3 == rand_2)
+                break;
+                case 2:
+                    game_input_select_2.textContent = game_kana_set[1][game_selection];
+                    var rand_1 = Math.floor(Math.random()*game_kana_preparation_set[0].length);
+                    var rand_2 = Math.floor(Math.random()*game_kana_preparation_set[0].length);
+                    var rand_3 = Math.floor(Math.random()*game_kana_preparation_set[0].length);
+
+                    do
+                    {
+                        rand_1 = Math.floor(Math.random()*game_kana_preparation_set[0].length);
+                        game_input_select_1.textContent = game_kana_preparation_set[1][rand_1];
+                    }
+                    while(game_kana_preparation_set[1][rand_1] == game_kana_set[1][game_selection])
+                    do
+                    {
+                        rand_2 = Math.floor(Math.random()*game_kana_preparation_set[0].length);
+                        game_input_select_3.textContent = game_kana_preparation_set[1][rand_2];
+                    }
+                    while(game_kana_preparation_set[1][rand_2] == game_kana_set[1][game_selection] || rand_2 == rand_1 )
+                    do
+                    {
+                        rand_3 = Math.floor(Math.random()*game_kana_preparation_set[0].length);
+                        game_input_select_4.textContent = game_kana_preparation_set[1][rand_3];
+                    }
+                    while(game_kana_preparation_set[1][rand_2] == game_kana_set[1][game_selection] || rand_3 == rand_1 || rand_3 == rand_2)
+                break;
+                case 3:
+                    game_input_select_3.textContent = game_kana_set[1][game_selection];
+                    var rand_1 = Math.floor(Math.random()*game_kana_preparation_set[0].length);
+                    var rand_2 = Math.floor(Math.random()*game_kana_preparation_set[0].length);
+                    var rand_3 = Math.floor(Math.random()*game_kana_preparation_set[0].length);
+
+                    do
+                    {
+                        rand_1 = Math.floor(Math.random()*game_kana_preparation_set[0].length);
+                        game_input_select_2.textContent = game_kana_preparation_set[1][rand_1];
+                    }
+                    while(game_kana_preparation_set[1][rand_1] == game_kana_set[1][game_selection])
+                    do
+                    {
+                        rand_2 = Math.floor(Math.random()*game_kana_preparation_set[0].length);
+                        game_input_select_1.textContent = game_kana_preparation_set[1][rand_2];
+                    }
+                    while(game_kana_preparation_set[1][rand_2] == game_kana_set[1][game_selection] || rand_2 == rand_1 )
+                    do
+                    {
+                        rand_3 = Math.floor(Math.random()*game_kana_preparation_set[0].length);
+                        game_input_select_4.textContent = game_kana_preparation_set[1][rand_3];
+                    }
+                    while(game_kana_preparation_set[1][rand_2] == game_kana_set[1][game_selection] || rand_3 == rand_1 || rand_3 == rand_2)
+                break;
+                case 4:
+                    game_input_select_4.textContent = game_kana_set[1][game_selection];
+                    var rand_1 = Math.floor(Math.random()*game_kana_preparation_set[0].length);
+                    var rand_2 = Math.floor(Math.random()*game_kana_preparation_set[0].length);
+                    var rand_3 = Math.floor(Math.random()*game_kana_preparation_set[0].length);
+
+                    do
+                    {
+                        rand_1 = Math.floor(Math.random()*game_kana_preparation_set[0].length);
+                        game_input_select_2.textContent = game_kana_preparation_set[1][rand_1];
+                    }
+                    while(game_kana_preparation_set[1][rand_1] == game_kana_set[1][game_selection])
+                    do
+                    {
+                        rand_2 = Math.floor(Math.random()*game_kana_preparation_set[0].length);
+                        game_input_select_3.textContent = game_kana_preparation_set[1][rand_2];
+                    }
+                    while(game_kana_preparation_set[1][rand_2] == game_kana_set[1][game_selection] || rand_2 == rand_1 )
+                    do
+                    {
+                        rand_3 = Math.floor(Math.random()*game_kana_preparation_set[0].length);
+                        game_input_select_1.textContent = game_kana_preparation_set[1][rand_3];
+                    }
+                    while(game_kana_preparation_set[1][rand_2] == game_kana_set[1][game_selection] || rand_3 == rand_1 || rand_3 == rand_2)
+                break;
+                }
+    }
 
 
 
@@ -635,7 +860,6 @@
                     summary_correct_input_td.style.color = "rgb("+x+", 255, 0)";
                     summary_total_input_td.style.color = "rgb("+x+", 255, 0)";
                 }
-                console.log(x);
             }
 
             summary_tab[i+1].appendChild(summary_user_td);
